@@ -6,67 +6,296 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>施工日誌速記</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background-color: #f1f5f9;
+      min-height: 100vh;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      user-select: none;
+    }
+    .container {
+      width: 100%;
+      max-width: 448px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 12px;
+    }
+    .header h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+    .badge {
+      font-size: 12px;
+      padding: 2px 10px;
+      background: #dcfce7;
+      color: #15803d;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+    details {
+      font-size: 12px;
+      color: #64748b;
+      background: #f8fafc;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: #334155;
+    }
+    .config-body {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    input[type="text"], input[type="date"], textarea {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 14px;
+      color: #1e293b;
+      background: #ffffff;
+      outline: none;
+    }
+    input[type="text"]:focus, input[type="date"]:focus, textarea:focus {
+      border-color: #2563eb;
+    }
+    .btn-secondary {
+      background: #334155;
+      color: #ffffff;
+      padding: 6px;
+      border-radius: 6px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+    }
+    .mic-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 0;
+    }
+    .mic-btn {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: #ffffff;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.35);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .mic-btn:active {
+      transform: scale(0.95);
+    }
+    .mic-btn.recording {
+      background: #ef4444 !0;
+      background-color: #ef4444;
+      animation: pulse 1.5s infinite;
+      box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.4);
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.85; }
+    }
+    .mic-btn svg {
+      width: 40px;
+      height: 40px;
+      fill: currentColor;
+    }
+    .mic-btn span {
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    .sub-hint {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 8px;
+    }
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .label-row label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+    }
+    .link-btn {
+      font-size: 12px;
+      color: #2563eb;
+      background: none;
+      border: none;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .preview-card {
+      border: 1px solid #bfdbfe;
+      background: #eff6ff;
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .card-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-title-row strong {
+      font-size: 12px;
+      color: #1e3a8a;
+    }
+    .site-tag {
+      font-size: 12px;
+      font-weight: 700;
+      background: #bfdbfe;
+      color: #1e40af;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .date-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      background: #ffffff;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid #dbeafe;
+    }
+    .date-row span {
+      font-weight: 600;
+      color: #334155;
+    }
+    .date-row input[type="date"] {
+      width: auto;
+      padding: 2px 6px;
+      font-size: 12px;
+    }
+    .details-list {
+      font-size: 12px;
+      color: #475569;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .details-list div span {
+      color: #0f172a;
+      font-weight: 600;
+    }
+    .btn-submit {
+      width: 100%;
+      background: #1e293b;
+      color: #ffffff;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-submit:hover {
+      background: #0f172a;
+    }
+    .btn-submit:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+  </style>
 </head>
-<body class="bg-slate-100 min-h-screen p-4 flex flex-col items-center select-none">
-  <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-5 flex flex-col gap-4">
-    <div class="flex justify-between items-center border-b pb-3">
-      <h1 class="text-xl font-bold text-slate-800">🏗️ 施工日誌速記</h1>
-      <span id="statusTag" class="text-xs px-2.5 py-1 bg-green-100 text-green-700 rounded-full font-medium">本機極速版</span>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🏗️ 施工日誌速記</h1>
+      <span id="statusTag" class="badge">本機極速版</span>
     </div>
 
     <!-- 系統設定展開 -->
-    <details class="text-xs text-slate-500 bg-slate-50 p-2.5 rounded-lg border">
-      <summary class="cursor-pointer font-medium text-slate-700">⚙️ 雲端寫入網址設定</summary>
-      <div class="mt-2 flex flex-col gap-2">
+    <details>
+      <summary>⚙️ 雲端寫入網址設定</summary>
+      <div class="config-body">
         <label>Google Apps Script 後端網址：
-          <input id="gasUrl" type="text" class="w-full border rounded p-1.5 text-slate-800" placeholder="貼上 Apps Script exec 網址">
+          <input id="gasUrl" type="text" placeholder="貼上 Apps Script exec 網址">
         </label>
-        <button onclick="saveConfig()" class="bg-slate-700 text-white py-1.5 rounded font-medium">儲存設定</button>
+        <button onclick="saveConfig()" class="btn-secondary">儲存設定</button>
       </div>
     </details>
 
     <!-- 語音輸入按鈕區 -->
-    <div class="flex flex-col items-center py-3">
-      <button id="micBtn" 
-              onclick="handleBtnClick()"
-              class="w-24 h-24 rounded-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white flex flex-col items-center justify-center shadow-lg transition-all duration-200">
-        <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
-        <span id="btnText" class="text-xs mt-1">點擊說話</span>
+    <div class="mic-section">
+      <button id="micBtn" onclick="handleBtnClick()" class="mic-btn">
+        <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+        <span id="btnText">點擊說話</span>
       </button>
-      <p id="subHint" class="text-xs text-slate-400 mt-2">點一下開始說話，說完再點一下</p>
+      <p id="subHint" class="sub-hint">點一下開始說話，說完再點一下</p>
     </div>
 
     <!-- 辨識文字與手動修改區 -->
     <div>
-      <div class="flex justify-between items-center mb-1">
-        <label class="text-xs font-semibold text-slate-600">辨識文字：</label>
-        <button onclick="reParseManual()" class="text-xs text-blue-600 underline">手動修改後重解</button>
+      <div class="label-row">
+        <label>辨識文字（可手動修改）：</label>
+        <button onclick="reParseManual()" class="link-btn">手動修改後重解</button>
       </div>
-      <textarea id="voiceText" rows="2" class="w-full border rounded-lg p-2 text-sm text-slate-800 bg-slate-50 focus:outline-none focus:bg-white" placeholder="例：永和國光昨天泥作2人門框填縫"></textarea>
+      <textarea id="voiceText" rows="2" placeholder="例：永和國光昨天泥作2人門框填縫、木工1人貼皮"></textarea>
     </div>
 
-    <!-- 結構化預覽卡片（含手動調整日期與案名） -->
-    <div id="parsedCard" class="border rounded-xl p-3 bg-blue-50/50 flex flex-col gap-2.5">
-      <div class="flex justify-between items-center">
-        <span class="text-xs font-bold text-blue-900">⚡ 本地秒級解析結果</span>
-        <span id="parsedSite" class="text-xs font-bold bg-blue-200 text-blue-800 px-2 py-0.5 rounded">案名：永和國光</span>
+    <!-- 結構化預覽卡片 -->
+    <div class="preview-card">
+      <div class="card-title-row">
+        <strong>⚡ 本地秒級解析結果</strong>
+        <span id="parsedSite" class="site-tag">案名：永和國光</span>
       </div>
 
       <!-- 日期調整欄位 -->
-      <div class="flex items-center justify-between text-xs bg-white p-2 rounded-lg border border-blue-100">
-        <span class="font-semibold text-slate-700">📅 記錄日期：</span>
-        <input id="logDate" type="date" class="border rounded px-2 py-1 text-slate-800 font-medium focus:outline-none focus:border-blue-500">
+      <div class="date-row">
+        <span>📅 記錄日期：</span>
+        <input id="logDate" type="date">
       </div>
 
-      <div id="parsedDetails" class="text-xs text-slate-600 space-y-1">
-        <div>• 施作工項：<span id="parsedTask" class="text-slate-800 font-medium">-</span></div>
-        <div>• 出工人數：<span id="parsedWorkers" class="text-slate-800 font-medium">-</span></div>
+      <div class="details-list">
+        <div>• 施作工項：<span id="parsedTask">-</span></div>
+        <div>• 出工人數：<span id="parsedWorkers">-</span></div>
       </div>
     </div>
 
     <!-- 送出按鈕 -->
-    <button id="sendBtn" onclick="sendToCloud()" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-3 rounded-xl font-medium text-sm transition">
+    <button id="sendBtn" onclick="sendToCloud()" class="btn-submit">
       確認並儲存至雲端
     </button>
   </div>
@@ -76,6 +305,7 @@
     let isRecording = false;
     let parsedResult = null;
 
+    // 試算表 D ~ L 欄工種順序
     const JOBS = ["大工", "小工", "隔間", "油漆", "木工", "金屬", "泥作", "機電", "清運"];
     const CHINESE_NUMS = {
       '零': 0, '一': 1, '二': 2, '兩': 2, '三': 3, '四': 4,
@@ -85,7 +315,6 @@
 
     window.onload = () => {
       document.getElementById('gasUrl').value = localStorage.getItem('gas_backend_url') || '';
-      // 預設填入今天日期
       setTargetDate(new Date());
       initSpeech();
     };
@@ -106,7 +335,7 @@
     function initSpeech() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
-        alert('警告：此瀏覽器不支援語音 API，請使用 Chrome 開啟！');
+        alert('警告：此瀏覽器不支援語音辨識 API，請使用 Chrome 瀏覽器開啟！');
         return false;
       }
       
@@ -118,8 +347,7 @@
 
         recognition.onstart = () => {
           isRecording = true;
-          document.getElementById('micBtn').classList.remove('bg-blue-600', 'hover:bg-blue-700');
-          document.getElementById('micBtn').classList.add('bg-red-500', 'animate-pulse');
+          document.getElementById('micBtn').classList.add('recording');
           document.getElementById('btnText').innerText = '正在聆聽...';
           document.getElementById('subHint').innerText = '說完請再點一下按鈕';
           document.getElementById('statusTag').innerText = '聆聽中...';
@@ -136,9 +364,9 @@
         recognition.onerror = (e) => {
           stopRecordingUI();
           if (e.error === 'not-allowed') {
-            alert('麥克風被封鎖！請至瀏覽器設定中開啟麥克風權限。');
+            alert('麥克風被封鎖！請點擊網址列左側的鎖頭圖示，將「麥克風」改為「允許」。');
           } else if (e.error !== 'no-speech') {
-            alert('語音中斷：' + e.error);
+            alert('語音中斷代碼：' + e.error);
           }
         };
 
@@ -169,4 +397,129 @@
 
     function stopRecordingUI() {
       isRecording = false;
-      document.getElementById('micBtn').classList.remove('bg-red-500', 'animate
+      document.getElementById('micBtn').classList.remove('recording');
+      document.getElementById('btnText').innerText = '點擊說話';
+      document.getElementById('subHint').innerText = '點一下開始說話，說完再點一下';
+      if (document.getElementById('statusTag').innerText === '聆聽中...') {
+        document.getElementById('statusTag').innerText = '本機極速版';
+      }
+    }
+
+    function reParseManual() {
+      const text = document.getElementById('voiceText').value.trim();
+      if (text) parseLocally(text);
+    }
+
+    // 手機本機純 JavaScript 極速解析引擎
+    function parseLocally(speechText) {
+      document.getElementById('statusTag').innerText = '解析完成';
+
+      // 1. 日期智能判定（昨天、前天、指定月日、或維持今天）
+      let targetDate = new Date();
+      if (speechText.includes("昨天") || speechText.includes("昨日")) {
+        targetDate.setDate(targetDate.getDate() - 1);
+      } else if (speechText.includes("前天") || speechText.includes("前日")) {
+        targetDate.setDate(targetDate.getDate() - 2);
+      } else {
+        const dateMatch = speechText.match(/(\d{1,2})[月\/](\d{1,2})[號日]?/);
+        if (dateMatch) {
+          const m = parseInt(dateMatch[1], 10) - 1;
+          const d = parseInt(dateMatch[2], 10);
+          targetDate.setMonth(m, d);
+        }
+      }
+      setTargetDate(targetDate);
+
+      // 2. 案名比對
+      let detectedSite = "永和國光";
+      if (speechText.includes("板橋")) {
+        detectedSite = "板橋電銷";
+      } else if (speechText.includes("永和") || speechText.includes("國光")) {
+        detectedSite = "永和國光";
+      } else if (speechText.includes("三重") || speechText.includes("捷運")) {
+        detectedSite = "三重捷運路";
+      }
+
+      // 3. 工種出工人數提取
+      let workers = {};
+      JOBS.forEach(j => workers[j] = 0);
+
+      JOBS.forEach(job => {
+        const pattern = new RegExp(`${job}\\s*([0-9]+(?:\\.[0-9]+)?|[一二兩三四五六七八九十半])\\s*(?:人|個|位|車)?`, 'i');
+        const match = speechText.match(pattern);
+        if (match) {
+          const rawNum = match[1];
+          workers[job] = CHINESE_NUMS[rawNum] !== undefined ? CHINESE_NUMS[rawNum] : (parseFloat(rawNum) || 0);
+        }
+      });
+
+      // 4. 清理文字提取施工工項
+      let cleanTask = speechText
+        .replace(/(永和國光|板橋電銷|三重捷運路|永和案|板橋案|案場|工地)/g, '')
+        .replace(/(今天|本日|昨日|昨天|前天|前日|\d{1,2}[月\/]\d{1,2}[號日]?)/g, '')
+        .replace(/(大工|小工|隔間|油漆|木工|金屬|泥作|機電|清運)\s*([0-9]+(?:\.[0-9]+)?|[一二兩三四五六七八九十半])\s*(?:人|個|位|車)?/g, '')
+        .replace(/[，,。、\s]+/g, ' ')
+        .trim();
+
+      parsedResult = {
+        site: detectedSite,
+        date: document.getElementById('logDate').value,
+        workers: workers,
+        mainTask: cleanTask || "現場施作",
+        subTask: "",
+        notes: ""
+      };
+
+      // 5. 更新卡片畫面
+      document.getElementById('parsedSite').innerText = '案名：' + parsedResult.site;
+      document.getElementById('parsedTask').innerText = parsedResult.mainTask;
+
+      let workerList = [];
+      for (const [job, count] of Object.entries(parsedResult.workers)) {
+        if (count > 0) workerList.push(`${job}: ${count}人`);
+      }
+      document.getElementById('parsedWorkers').innerText = workerList.length ? workerList.join('、') : '無出工';
+    }
+
+    async function sendToCloud() {
+      const gasUrl = (localStorage.getItem('gas_backend_url') || '').trim();
+      if (!gasUrl) {
+        alert('請先在設定中填入 GAS 後端網址！');
+        return;
+      }
+      if (!parsedResult) {
+        alert('尚未有解析資料，請先錄音或手動輸入！');
+        return;
+      }
+
+      // 同步以使用者目前畫面上選取的日期為準
+      parsedResult.date = document.getElementById('logDate').value;
+
+      document.getElementById('sendBtn').innerText = '正在存入試算表...';
+      document.getElementById('sendBtn').disabled = true;
+
+      try {
+        const res = await fetch(gasUrl, {
+          method: 'POST',
+          body: JSON.stringify(parsedResult)
+        });
+        const resp = await res.json();
+        alert(resp.message || '已成功儲存至 Google 試算表！');
+        
+        // 成功後重設介面
+        document.getElementById('voiceText').value = '';
+        parsedResult = null;
+        document.getElementById('parsedTask').innerText = '-';
+        document.getElementById('parsedWorkers').innerText = '-';
+        document.getElementById('statusTag').innerText = '本機極速版';
+        setTargetDate(new Date());
+      } catch (e) {
+        alert('已送出請求！請檢查試算表對應日期是否已更新。');
+      } finally {
+        document.getElementById('sendBtn').innerText = '確認並儲存至雲端';
+        document.getElementById('sendBtn').disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

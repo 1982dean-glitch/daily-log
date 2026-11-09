@@ -8,14 +8,14 @@
   <title>施工日誌速記</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-100 min-h-screen p-4 flex flex-col items-center">
+<body class="bg-slate-100 min-h-screen p-4 flex flex-col items-center select-none">
   <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-5 flex flex-col gap-4">
     <div class="flex justify-between items-center border-b pb-3">
       <h1 class="text-xl font-bold text-slate-800">🏗️ 施工日誌速記</h1>
       <span id="statusTag" class="text-xs px-2.5 py-1 bg-green-100 text-green-700 rounded-full font-medium">本機極速版</span>
     </div>
 
-    <!-- 系統設定展開 (僅需設定 GAS 網址) -->
+    <!-- 系統設定展開 -->
     <details class="text-xs text-slate-500 bg-slate-50 p-2.5 rounded-lg border">
       <summary class="cursor-pointer font-medium text-slate-700">⚙️ 雲端寫入網址設定</summary>
       <div class="mt-2 flex flex-col gap-2">
@@ -28,20 +28,22 @@
 
     <!-- 語音輸入按鈕區 -->
     <div class="flex flex-col items-center py-4">
-      <button id="micBtn" onclick="toggleRecording()" class="w-24 h-24 rounded-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white flex flex-col items-center justify-center shadow-lg transition-all duration-200">
+      <button id="micBtn" 
+              onclick="handleBtnClick()"
+              class="w-24 h-24 rounded-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white flex flex-col items-center justify-center shadow-lg transition-all duration-200">
         <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
-        <span id="btnText" class="text-xs mt-1">按住說話</span>
+        <span id="btnText" class="text-xs mt-1">點擊說話</span>
       </button>
-      <p class="text-xs text-slate-400 mt-2">點擊開始語音辨識，說完再次點擊</p>
+      <p id="subHint" class="text-xs text-slate-400 mt-2">點一下開始說話，說完再點一下</p>
     </div>
 
-    <!-- 語音辨識結果與手動修改區 -->
+    <!-- 辨識文字與重解區 -->
     <div>
       <div class="flex justify-between items-center mb-1">
-        <label class="text-xs font-semibold text-slate-600">辨識文字（可手動修改）：</label>
-        <button onclick="reParseManual()" class="text-xs text-blue-600 underline">重新解析</button>
+        <label class="text-xs font-semibold text-slate-600">辨識文字：</label>
+        <button onclick="reParseManual()" class="text-xs text-blue-600 underline">手動修改後重解</button>
       </div>
-      <textarea id="voiceText" rows="2" class="w-full border rounded-lg p-2 text-sm text-slate-800 bg-slate-50 focus:outline-none focus:bg-white" placeholder="例：永和國光今天泥作2人門框填縫、木工1人貼皮收尾"></textarea>
+      <textarea id="voiceText" rows="2" class="w-full border rounded-lg p-2 text-sm text-slate-800 bg-slate-50 focus:outline-none focus:bg-white" placeholder="例：永和國光今天泥作2人門框填縫、木工1人貼皮"></textarea>
     </div>
 
     <!-- 結構化預覽卡片 -->
@@ -67,10 +69,7 @@
     let isRecording = false;
     let parsedResult = null;
 
-    // 支援工種清單（對齊試算表 D ~ L 欄順序）
     const JOBS = ["大工", "小工", "隔間", "油漆", "木工", "金屬", "泥作", "機電", "清運"];
-    
-    // 中文數字轉換字典
     const CHINESE_NUMS = {
       '零': 0, '一': 1, '二': 2, '兩': 2, '三': 3, '四': 4,
       '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10,
@@ -91,13 +90,23 @@
     function initSpeech() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
-        alert('您的瀏覽器不支援語音辨識，請使用 Chrome 開啟。');
+        alert('此手機瀏覽器不支援語音辨識，請使用 Android Chrome 開啟！');
         return;
       }
+      
       recognition = new SpeechRecognition();
       recognition.lang = 'zh-TW';
       recognition.continuous = false;
       recognition.interimResults = false;
+
+      recognition.onstart = () => {
+        isRecording = true;
+        document.getElementById('micBtn').classList.remove('bg-blue-600', 'hover:bg-blue-700');
+        document.getElementById('micBtn').classList.add('bg-red-500', 'animate-pulse');
+        document.getElementById('btnText').innerText = '正在聆聽...';
+        document.getElementById('subHint').innerText = '說完請再次點擊按鈕結束';
+        document.getElementById('statusTag').innerText = '聆聽中...';
+      };
 
       recognition.onresult = (e) => {
         const text = e.results[0][0].transcript;
@@ -105,11 +114,122 @@
         parseLocally(text);
       };
 
-      recognition.onerror = () => stopRecording();
-      recognition.onend = () => stopRecording();
+      recognition.onerror = (e) => {
+        console.error(e);
+        stopRecordingUI();
+        if (e.error === 'not-allowed') {
+          alert('麥克風權限被拒絕！請至 Chrome 網站設定中開啟麥克風權限。');
+        } else if (e.error === 'no-speech') {
+          alert('未偵測到聲音，請再試一次！');
+        } else {
+          alert('語音辨識中斷：' + e.error);
+        }
+      };
+
+      recognition.onend = () => {
+        stopRecordingUI();
+      };
     }
 
-    function toggleRecording() {
+    function handleBtnClick() {
+      if (!recognition) {
+        initSpeech();
+        if (!recognition) return;
+      }
+
       if (!isRecording) {
         try {
           recognition.start();
+        } catch (err) {
+          console.warn('重新啟動辨識...', err);
+          recognition.stop();
+          setTimeout(() => recognition.start(), 200);
+        }
+      } else {
+        recognition.stop();
+      }
+    }
+
+    function stopRecordingUI() {
+      isRecording = false;
+      document.getElementById('micBtn').classList.remove('bg-red-500', 'animate-pulse');
+      document.getElementById('micBtn').classList.add('bg-blue-600', 'hover:bg-blue-700');
+      document.getElementById('btnText').innerText = '點擊說話';
+      document.getElementById('subHint').innerText = '點一下開始說話，說完再點一下';
+      if (document.getElementById('statusTag').innerText === '聆聽中...') {
+        document.getElementById('statusTag').innerText = '本機極速版';
+      }
+    }
+
+    function reParseManual() {
+      const text = document.getElementById('voiceText').value.trim();
+      if (text) parseLocally(text);
+    }
+
+    function parseLocally(speechText) {
+      document.getElementById('statusTag').innerText = '解析完成';
+
+      // 1. 案名比對
+      let detectedSite = "永和國光";
+      if (speechText.includes("板橋")) {
+        detectedSite = "板橋電銷";
+      } else if (speechText.includes("永和") || speechText.includes("國光")) {
+        detectedSite = "永和國光";
+      }
+
+      // 2. 工種出工人數提取
+      let workers = {};
+      JOBS.forEach(j => workers[j] = 0);
+
+      JOBS.forEach(job => {
+        const pattern = new RegExp(`${job}\\s*([0-9]+(?:\\.[0-9]+)?|[一二兩三四五六七八九十半])\\s*(?:人|個|位|車)?`, 'i');
+        const match = speechText.match(pattern);
+        if (match) {
+          const rawNum = match[1];
+          workers[job] = CHINESE_NUMS[rawNum] !== undefined ? CHINESE_NUMS[rawNum] : (parseFloat(rawNum) || 0);
+        }
+      });
+
+      // 3. 提取施作項目
+      let cleanTask = speechText
+        .replace(/(永和國光|板橋電銷|永和案|板橋案|案場|工地|今天|本日|昨日|昨天|施工日誌|日誌記錄)/g, '')
+        .replace(/(大工|小工|隔間|油漆|木工|金屬|泥作|機電|清運)\s*([0-9]+(?:\.[0-9]+)?|[一二兩三四五六七八九十半])\s*(?:人|個|位|車)?/g, '')
+        .replace(/[，,。、\s]+/g, ' ')
+        .trim();
+
+      parsedResult = {
+        site: detectedSite,
+        date: new Date().toISOString().split('T')[0],
+        workers: workers,
+        mainTask: cleanTask || "現場施作",
+        subTask: "",
+        notes: ""
+      };
+
+      // 4. 即時更新畫面
+      document.getElementById('parsedSite').innerText = '案名：' + parsedResult.site;
+      document.getElementById('parsedTask').innerText = parsedResult.mainTask;
+
+      let workerList = [];
+      for (const [job, count] of Object.entries(parsedResult.workers)) {
+        if (count > 0) workerList.push(`${job}: ${count}人`);
+      }
+      document.getElementById('parsedWorkers').innerText = workerList.length ? workerList.join('、') : '無出工';
+    }
+
+    async function sendToCloud() {
+      const gasUrl = (localStorage.getItem('gas_backend_url') || '').trim();
+      if (!gasUrl) {
+        alert('請先在設定中填入 GAS 網址！');
+        return;
+      }
+      if (!parsedResult) {
+        alert('尚未有解析資料，請先錄音或手動輸入！');
+        return;
+      }
+
+      document.getElementById('sendBtn').innerText = '正在存入試算表...';
+      document.getElementById('sendBtn').disabled = true;
+
+      try {
+        const res = await fetch(gasUrl, {

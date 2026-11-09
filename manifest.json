@@ -1,0 +1,15 @@
+{
+  "name": "施工日誌速記",
+  "short_name": "施工日誌",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/4341/4341139.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -119,8 +119,8 @@
       document.getElementById('btnText').innerText = '按住說話';
     }
 
-    async function parseWithGemini(userSpeech) {
-      const apiKey = localStorage.getItem('gemini_api_key');
+   async function parseWithGemini(userSpeech) {
+      const apiKey = (localStorage.getItem('gemini_api_key') || '').trim();
       if (!apiKey) {
         alert('請先在設定中填入 Gemini API Key！');
         return;
@@ -154,22 +154,34 @@
         });
 
         const result = await res.json();
+
+        // 攔截 Google API 回傳的具體錯誤
+        if (result.error) {
+          throw new Error(`Google API 錯誤 (${result.error.code})：${result.error.message}`);
+        }
+
+        if (!result.candidates || !result.candidates[0] || !result.candidates[0].content) {
+          throw new Error('Google 未能產生內容，請換句話再試一次');
+        }
+
         const jsonText = result.candidates[0].content.parts[0].text;
         parsedResult = JSON.parse(jsonText);
 
         // 渲染解析卡片
-        document.getElementById('parsedSite').innerText = '案名：' + parsedResult.site;
-        document.getElementById('parsedTask').innerText = parsedResult.mainTask + (parsedResult.subTask ? `（配合：${parsedResult.subTask}）` : '');
+        document.getElementById('parsedSite').innerText = '案名：' + (parsedResult.site || '未指定');
+        document.getElementById('parsedTask').innerText = (parsedResult.mainTask || '-') + (parsedResult.subTask ? `（配合：${parsedResult.subTask}）` : '');
         
         let workerList = [];
-        for (const [job, count] of Object.entries(parsedResult.workers)) {
-          if (count > 0) workerList.push(`${job}: ${count}人`);
+        if (parsedResult.workers) {
+          for (const [job, count] of Object.entries(parsedResult.workers)) {
+            if (count > 0) workerList.push(`${job}: ${count}人`);
+          }
         }
-        document.getElementById('parsedWorkers').innerText = workerList.length ? workerList.join('、') : '未指明人數';
+        document.getElementById('parsedWorkers').innerText = workerList.length ? workerList.join('、') : '無出工';
         document.getElementById('statusTag').innerText = '解析完成';
 
       } catch (err) {
-        alert('Gemini 解析失敗：' + err.message);
+        alert('解析失敗：' + err.message);
         document.getElementById('statusTag').innerText = '解析出錯';
       }
     }

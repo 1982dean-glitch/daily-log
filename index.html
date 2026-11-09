@@ -37,7 +37,7 @@
       <p id="subHint" class="text-xs text-slate-400 mt-2">點一下開始說話，說完再點一下</p>
     </div>
 
-    <!-- 辨識文字與重解區 -->
+    <!-- 辨識文字與手動修改區 -->
     <div>
       <div class="flex justify-between items-center mb-1">
         <label class="text-xs font-semibold text-slate-600">辨識文字：</label>
@@ -65,7 +65,7 @@
   </div>
 
   <script>
-    let recognition;
+    let recognition = null;
     let isRecording = false;
     let parsedResult = null;
 
@@ -90,60 +90,71 @@
     function initSpeech() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
-        alert('此手機瀏覽器不支援語音辨識，請使用 Android Chrome 開啟！');
-        return;
+        alert('警告：此瀏覽器完全不支援語音 API！請務必改用 Android 原生 Chrome 或 iPhone Safari 開啟。');
+        return false;
       }
       
-      recognition = new SpeechRecognition();
-      recognition.lang = 'zh-TW';
-      recognition.continuous = false;
-      recognition.interimResults = false;
+      try {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'zh-TW';
+        recognition.continuous = false;
+        recognition.interimResults = false;
 
-      recognition.onstart = () => {
-        isRecording = true;
-        document.getElementById('micBtn').classList.remove('bg-blue-600', 'hover:bg-blue-700');
-        document.getElementById('micBtn').classList.add('bg-red-500', 'animate-pulse');
-        document.getElementById('btnText').innerText = '正在聆聽...';
-        document.getElementById('subHint').innerText = '說完請再次點擊按鈕結束';
-        document.getElementById('statusTag').innerText = '聆聽中...';
-      };
+        recognition.onstart = () => {
+          isRecording = true;
+          document.getElementById('micBtn').classList.remove('bg-blue-600', 'hover:bg-blue-700');
+          document.getElementById('micBtn').classList.add('bg-red-500', 'animate-pulse');
+          document.getElementById('btnText').innerText = '正在聆聽...';
+          document.getElementById('subHint').innerText = '說完請再點一下按鈕';
+          document.getElementById('statusTag').innerText = '聆聽中...';
+        };
 
-      recognition.onresult = (e) => {
-        const text = e.results[0][0].transcript;
-        document.getElementById('voiceText').value = text;
-        parseLocally(text);
-      };
+        recognition.onresult = (e) => {
+          if (e.results && e.results[0] && e.results[0][0]) {
+            const text = e.results[0][0].transcript;
+            document.getElementById('voiceText').value = text;
+            parseLocally(text);
+          }
+        };
 
-      recognition.onerror = (e) => {
-        console.error(e);
-        stopRecordingUI();
-        if (e.error === 'not-allowed') {
-          alert('麥克風權限被拒絕！請至 Chrome 網站設定中開啟麥克風權限。');
-        } else if (e.error === 'no-speech') {
-          alert('未偵測到聲音，請再試一次！');
-        } else {
-          alert('語音辨識中斷：' + e.error);
-        }
-      };
+        recognition.onerror = (e) => {
+          stopRecordingUI();
+          if (e.error === 'not-allowed') {
+            alert('麥克風被封鎖！請點擊網址列左側的鎖頭圖示，將「麥克風」改為「允許」。');
+          } else if (e.error === 'no-speech') {
+            alert('沒聽清楚聲音，請靠近手機再試一次！');
+          } else {
+            alert('語音中斷代碼：' + e.error);
+          }
+        };
 
-      recognition.onend = () => {
-        stopRecordingUI();
-      };
+        recognition.onend = () => {
+          stopRecordingUI();
+        };
+
+        return true;
+      } catch (err) {
+        alert('語音元件初始化失敗：' + err.message);
+        return false;
+      }
     }
 
     function handleBtnClick() {
       if (!recognition) {
-        initSpeech();
-        if (!recognition) return;
+        const ok = initSpeech();
+        if (!ok) return;
       }
 
       if (!isRecording) {
         try {
           recognition.start();
         } catch (err) {
-          console.warn('重新啟動辨識...', err);
-          recognition.stop();
-          setTimeout(() => recognition.start(), 200);
+          try {
+            recognition.stop();
+          } catch(e) {}
+          setTimeout(() => {
+            try { recognition.start(); } catch(e) { alert('啟動失敗：' + e.message); }
+          }, 300);
         }
       } else {
         recognition.stop();
@@ -169,7 +180,6 @@
     function parseLocally(speechText) {
       document.getElementById('statusTag').innerText = '解析完成';
 
-      // 1. 案名比對
       let detectedSite = "永和國光";
       if (speechText.includes("板橋")) {
         detectedSite = "板橋電銷";
@@ -177,7 +187,6 @@
         detectedSite = "永和國光";
       }
 
-      // 2. 工種出工人數提取
       let workers = {};
       JOBS.forEach(j => workers[j] = 0);
 
@@ -190,7 +199,6 @@
         }
       });
 
-      // 3. 提取施作項目
       let cleanTask = speechText
         .replace(/(永和國光|板橋電銷|永和案|板橋案|案場|工地|今天|本日|昨日|昨天|施工日誌|日誌記錄)/g, '')
         .replace(/(大工|小工|隔間|油漆|木工|金屬|泥作|機電|清運)\s*([0-9]+(?:\.[0-9]+)?|[一二兩三四五六七八九十半])\s*(?:人|個|位|車)?/g, '')
@@ -206,7 +214,6 @@
         notes: ""
       };
 
-      // 4. 即時更新畫面
       document.getElementById('parsedSite').innerText = '案名：' + parsedResult.site;
       document.getElementById('parsedTask').innerText = parsedResult.mainTask;
 
@@ -233,3 +240,24 @@
 
       try {
         const res = await fetch(gasUrl, {
+          method: 'POST',
+          body: JSON.stringify(parsedResult)
+        });
+        const resp = await res.json();
+        alert(resp.message || '已成功儲存至 Google 試算表！');
+        document.getElementById('voiceText').value = '';
+        parsedResult = null;
+        document.getElementById('parsedSite').innerText = '案名：待解析';
+        document.getElementById('parsedTask').innerText = '-';
+        document.getElementById('parsedWorkers').innerText = '-';
+        document.getElementById('statusTag').innerText = '本機極速版';
+      } catch (e) {
+        alert('已送出請求！請查看試算表是否已更新。');
+      } finally {
+        document.getElementById('sendBtn').innerText = '確認並儲存至雲端';
+        document.getElementById('sendBtn').disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

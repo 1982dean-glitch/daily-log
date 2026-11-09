@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>施工日誌語音速記</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen p-4 flex flex-col items-center">
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-5 flex flex-col gap-4">
+    <div class="flex justify-between items-center border-b pb-3">
+      <h1 class="text-xl font-bold text-slate-800">🏗️ 施工日誌速記</h1>
+      <span id="statusTag" class="text-xs px-2.5 py-1 bg-green-100 text-green-700 rounded-full font-medium">就緒</span>
+    </div>
+
+    <!-- 系統設定展開 -->
+    <details class="text-xs text-slate-500 bg-slate-50 p-2.5 rounded-lg border">
+      <summary class="cursor-pointer font-medium text-slate-700">⚙️ API 與後端網址設定</summary>
+      <div class="mt-2 flex flex-col gap-2">
+        <label>Gemini API Key：
+          <input id="apiKey" type="password" class="w-full border rounded p-1 text-slate-800" placeholder="貼上 AI Studio Key">
+        </label>
+        <label>GAS 後端網址：
+          <input id="gasUrl" type="text" class="w-full border rounded p-1 text-slate-800" placeholder="貼上 Apps Script exec 網址">
+        </label>
+        <button onclick="saveConfig()" class="bg-slate-700 text-white py-1 rounded">儲存設定</button>
+      </div>
+    </details>
+
+    <!-- 語音輸入按鈕區 -->
+    <div class="flex flex-col items-center py-4">
+      <button id="micBtn" onclick="toggleRecording()" class="w-24 h-24 rounded-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white flex flex-col items-center justify-center shadow-lg transition-all duration-200">
+        <svg id="micIcon" class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+        <span id="btnText" class="text-xs mt-1">按住說話</span>
+      </button>
+      <p class="text-xs text-slate-400 mt-2">點擊開始語音辨識，說完再次點擊</p>
+    </div>
+
+    <!-- 語音辨識結果 -->
+    <div>
+      <label class="text-xs font-semibold text-slate-600">辨識口述文字：</label>
+      <textarea id="voiceText" rows="2" class="w-full border rounded-lg p-2 text-sm text-slate-800 bg-slate-50 focus:outline-none focus:bg-white" placeholder="例：永和國光今天泥作2人門框填縫、木工1人貼皮收尾"></textarea>
+    </div>
+
+    <!-- Gemini 解析卡片 -->
+    <div id="parsedCard" class="border rounded-xl p-3 bg-blue-50/50 flex flex-col gap-2">
+      <div class="flex justify-between items-center">
+        <span class="text-xs font-bold text-blue-900">AI 結構化預覽</span>
+        <span id="parsedSite" class="text-xs font-bold bg-blue-200 text-blue-800 px-2 py-0.5 rounded">案名：待解析</span>
+      </div>
+      <div id="parsedDetails" class="text-xs text-slate-600 space-y-1">
+        <div>• 施作工項：<span id="parsedTask">-</span></div>
+        <div>• 出工人數：<span id="parsedWorkers">-</span></div>
+      </div>
+    </div>
+
+    <!-- 送出按鈕 -->
+    <button id="sendBtn" onclick="sendToCloud()" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-3 rounded-xl font-medium text-sm transition">
+      確認並儲存至雲端
+    </button>
+  </div>
+
+  <script>
+    let recognition;
+    let isRecording = false;
+    let parsedResult = null;
+
+    window.onload = () => {
+      document.getElementById('apiKey').value = localStorage.getItem('gemini_api_key') || '';
+      document.getElementById('gasUrl').value = localStorage.getItem('gas_backend_url') || '';
+      initSpeech();
+    };
+
+    function saveConfig() {
+      localStorage.setItem('gemini_api_key', document.getElementById('apiKey').value.trim());
+      localStorage.setItem('gas_backend_url', document.getElementById('gasUrl').value.trim());
+      alert('設定已儲存！');
+    }
+
+    function initSpeech() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert('您的瀏覽器不支援語音辨識，請使用 Chrome 或 Safari 開啟。');
+        return;
+      }
+      recognition = new SpeechRecognition();
+      recognition.lang = 'zh-TW';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onresult = (e) => {
+        const text = e.results[0][0].transcript;
+        document.getElementById('voiceText').value = text;
+        parseWithGemini(text);
+      };
+
+      recognition.onerror = () => stopRecording();
+      recognition.onend = () => stopRecording();
+    }
+
+    function toggleRecording() {
+      if (!isRecording) {
+        recognition.start();
+        isRecording = true;
+        document.getElementById('micBtn').classList.add('bg-red-500', 'animate-pulse');
+        document.getElementById('btnText').innerText = '正在聆聽...';
+      } else {
+        recognition.stop();
+        stopRecording();
+      }
+    }
+
+    function stopRecording() {
+      isRecording = false;
+      document.getElementById('micBtn').classList.remove('bg-red-500', 'animate-pulse');
+      document.getElementById('btnText').innerText = '按住說話';
+    }
+
+    async function parseWithGemini(userSpeech) {
+      const apiKey = localStorage.getItem('gemini_api_key');
+      if (!apiKey) {
+        alert('請先在設定中填入 Gemini API Key！');
+        return;
+      }
+
+      document.getElementById('statusTag').innerText = 'Gemini 解析中...';
+      const prompt = `你是營造施工日誌助手。請將下列這段語音文字精準解析為標準 JSON 物件。
+語音內容: "${userSpeech}"
+今天的日期是: "${new Date().toISOString().split('T')[0]}"
+
+請回傳嚴格的 JSON 格式（不要使用 Markdown 標籤），格式如下：
+{
+  "site": "案場名稱，例：永和國光、板橋電銷",
+  "date": "YYYY-MM-DD",
+  "workers": {
+    "大工": 0, "小工": 0, "隔間": 0, "油漆": 0, "木工": 0, "金屬": 0, "泥作": 0, "機電": 0, "清運": 0
+  },
+  "mainTask": "主要施作工項與區域",
+  "subTask": "配合或次要工項",
+  "notes": "備註或材料"
+}`;
+
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { responseMimeType: "application/json" }
+          })
+        });
+
+        const result = await res.json();
+        const jsonText = result.candidates[0].content.parts[0].text;
+        parsedResult = JSON.parse(jsonText);
+
+        // 渲染解析卡片
+        document.getElementById('parsedSite').innerText = '案名：' + parsedResult.site;
+        document.getElementById('parsedTask').innerText = parsedResult.mainTask + (parsedResult.subTask ? `（配合：${parsedResult.subTask}）` : '');
+        
+        let workerList = [];
+        for (const [job, count] of Object.entries(parsedResult.workers)) {
+          if (count > 0) workerList.push(`${job}: ${count}人`);
+        }
+        document.getElementById('parsedWorkers').innerText = workerList.length ? workerList.join('、') : '未指明人數';
+        document.getElementById('statusTag').innerText = '解析完成';
+
+      } catch (err) {
+        alert('Gemini 解析失敗：' + err.message);
+        document.getElementById('statusTag').innerText = '解析出錯';
+      }
+    }
+
+    async function sendToCloud() {
+      const gasUrl = localStorage.getItem('gas_backend_url');
+      if (!gasUrl) {
+        alert('請先在設定中填入 GAS 後端網址！');
+        return;
+      }
+      if (!parsedResult) {
+        alert('尚未有解析資料，請先用語音輸入！');
+        return;
+      }
+
+      document.getElementById('sendBtn').innerText = '正在存入試算表...';
+      document.getElementById('sendBtn').disabled = true;
+
+      try {
+        const res = await fetch(gasUrl, {
+          method: 'POST',
+          body: JSON.stringify(parsedResult)
+        });
+        const resp = await res.json();
+        alert(resp.message);
+        document.getElementById('voiceText').value = '';
+        parsedResult = null;
+        document.getElementById('parsedSite').innerText = '案名：待解析';
+        document.getElementById('parsedTask').innerText = '-';
+        document.getElementById('parsedWorkers').innerText = '-';
+        document.getElementById('statusTag').innerText = '就緒';
+      } catch (e) {
+        alert('寫入雲端成功或網路非標準返回，請查看試算表是否更新！');
+      } finally {
+        document.getElementById('sendBtn').innerText = '確認並儲存至雲端';
+        document.getElementById('sendBtn').disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

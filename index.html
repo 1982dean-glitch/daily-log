@@ -77,7 +77,7 @@
         <label>辨識文字（可手動修改）：</label>
         <button onclick="reParseManual()" class="link-btn">手動修改後重解</button>
       </div>
-      <textarea id="voiceText" rows="2" placeholder="例：永和國光今天泥作2人、防水1人施作窗框防水"></textarea>
+      <textarea id="voiceText" rows="2" placeholder="例：永和國光今天木工2人、水電1人、防水1人配管及防水施作"></textarea>
     </div>
 
     <!-- 結構化預覽卡片 -->
@@ -95,7 +95,7 @@
       <div class="details-list">
         <div>• 施作工項：<span id="parsedTask">-</span></div>
         <div>• 出工人數：<span id="parsedWorkers">-</span></div>
-        <div>• 其他備註：<span id="parsedNotes">-</span></div>
+        <div>• 備註資訊：<span id="parsedNotes">-</span></div>
       </div>
     </div>
 
@@ -110,10 +110,22 @@
     let isRecording = false;
     let parsedResult = null;
 
-    // 標準 9 大工種 (對齊試算表 D ~ L 欄)
-    const STANDARD_JOBS = ["大工", "小工", "隔間", "油漆", "木工", "金屬", "泥作", "機電", "清運"];
-    
-    // 中文數字換算字典
+    // 9 大基本工項標準定義與涵蓋別名
+    const STANDARD_JOBS_CONFIG = [
+      { name: "大工", aliases: ["大工"] },
+      { name: "小工", aliases: ["小工", "雜工"] },
+      { name: "隔間", aliases: ["隔間", "輕隔間", "隔間工", "輕鋼架"] },
+      { name: "油漆", aliases: ["油漆", "油漆工", "油漆師傅", "漆作", "塗裝", "油漆工班"] },
+      { name: "木工", aliases: ["木工", "木作", "木工師傅", "木工工班"] },
+      { name: "金屬", aliases: ["金屬", "鐵件", "鐵工", "金屬工", "鐵工師傅"] },
+      { name: "泥作", aliases: ["泥作", "泥水", "泥作工", "泥作師傅", "泥工", "泥水工"] },
+      { name: "機電", aliases: ["機電", "水電", "水電工", "水電師傅", "電工", "水電工班"] },
+      { name: "清運", aliases: ["清運", "清潔", "垃圾車", "廢料清運", "清運車"] }
+    ];
+
+    // 全域基本工項黑名單：確保「其他」絕不納入任何基本工種
+    const ALL_STANDARD_KEYWORDS = STANDARD_JOBS_CONFIG.flatMap(j => [j.name, ...j.aliases]);
+
     const CHINESE_NUMS = {
       '零': 0, '一': 1, '二': 2, '兩': 2, '三': 3, '四': 4,
       '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10,
@@ -217,7 +229,7 @@
       if (text) parseLocally(text);
     }
 
-    // 本地多工種智能解析 (含標準工種與非標準「其他」出工分類)
+    // 嚴格兩階段解析：基本工項歸位 + 非基本工項分流
     function parseLocally(speechText) {
       document.getElementById('statusTag').innerText = '解析完成';
 
@@ -247,48 +259,58 @@
         detectedSite = "三重捷運路";
       }
 
-      // 3. 工種出工人數提取（標準 + 非標準自動歸入「其他」）
+      let remainingText = speechText;
+
+      // 3. 第一階段：優先提取 9 大基本工項（鎖定 D~L 專屬欄位）
       let workers = {};
-      STANDARD_JOBS.forEach(j => workers[j] = 0);
+      STANDARD_JOBS_CONFIG.forEach(job => {
+        workers[job.name] = 0;
+        const aliasPattern = job.aliases.join('|');
+        const regex = new RegExp(`(?:${aliasPattern})\\s*([0-9]+(?:\\.[0-9]+)?|[一二兩三四五六七八九十半])\\s*(?:人|個|位|車)?`, 'i');
+        const match = remainingText.match(regex);
+        if (match) {
+          const rawNum = match[1];
+          const count = CHINESE_NUMS[rawNum] !== undefined ? CHINESE_NUMS[rawNum] : (parseFloat(rawNum) || 0);
+          workers[job.name] = count;
+          // 自文字中抹除已歸類的標準工項
+          remainingText = remainingText.replace(match[0], ' ');
+        }
+      });
+
+      // 4. 第二階段：提取真正的新工項（黑名單嚴格過濾）
       let otherWorkers = 0;
       let otherDetails = [];
+      const customJobPattern = /([\u4e00-\u9fa5]{2,4})\s*([0-9]+(?:\.[0-9]+)?|[一二兩三四五六七八九十半])\s*(?:人|個|位|車)?/g;
+      let customMatch;
 
-      // 泛用工種正規式：抓取「[工種名稱 2~4 字] + [人數] + 人/位/個」
-      const generalJobPattern = /([\u4e00-\u9fa5]{2,4})\s*([0-9]+(?:\.[0-9]+)?|[一二兩三四五六七八九十半])\s*(?:人|個|位|車)?/g;
-      let match;
-      let extractedWords = [];
-
-      while ((match = generalJobPattern.exec(speechText)) !== null) {
-        const jobName = match[1];
-        const rawNum = match[2];
+      while ((customMatch = customJobPattern.exec(remainingText)) !== null) {
+        const jobName = customMatch[1];
+        const rawNum = customMatch[2];
         const count = CHINESE_NUMS[rawNum] !== undefined ? CHINESE_NUMS[rawNum] : (parseFloat(rawNum) || 0);
 
-        // 避免將「今天2人」、「工程1人」等非工種字眼誤判
-        if (["今天", "昨天", "昨日", "前天", "工程", "現場", "施作", "案場", "工地"].includes(jobName)) {
+        // 規則 A：包含任何 9 大基本工項字眼，絕對不計入「其他」
+        const isStandardJob = ALL_STANDARD_KEYWORDS.some(kw => jobName.includes(kw) || kw.includes(jobName));
+        if (isStandardJob) {
+          remainingText = remainingText.replace(customMatch[0], ' ');
           continue;
         }
 
-        extractedWords.push(match[0]);
-
-        if (STANDARD_JOBS.includes(jobName)) {
-          workers[jobName] = (workers[jobName] || 0) + count;
-        } else {
-          // 不在 9 大工種中，歸入「其他」
-          otherWorkers += count;
-          otherDetails.push(`${jobName}: ${count}人`);
+        // 規則 B：排除非工種常用詞
+        if (["今天", "昨天", "昨日", "前天", "工程", "現場", "施作", "案場", "工地", "合計", "總共"].includes(jobName)) {
+          continue;
         }
+
+        otherWorkers += count;
+        otherDetails.push(`${jobName}: ${count}人`);
+        remainingText = remainingText.replace(customMatch[0], ' ');
       }
 
-      // 4. 清理文字提取主要工項
-      let cleanTask = speechText
+      // 5. 提取施作內容（工項乾淨化）
+      let cleanTask = remainingText
         .replace(/(永和國光|板橋電銷|三重捷運路|永和案|板橋案|案場|工地)/g, '')
-        .replace(/(今天|本日|昨日|昨天|前天|前日|\d{1,2}[月\/]\d{1,2}[號日]?)/g, '');
-
-      // 移除已提取的工種出工字眼
-      extractedWords.forEach(w => {
-        cleanTask = cleanTask.replace(w, '');
-      });
-      cleanTask = cleanTask.replace(/[，,。、\s]+/g, ' ').trim();
+        .replace(/(今天|本日|昨日|昨天|前天|前日|\d{1,2}[月\/]\d{1,2}[號日]?)/g, '')
+        .replace(/[，,。、\s]+/g, ' ')
+        .trim();
 
       parsedResult = {
         site: detectedSite,
@@ -301,7 +323,7 @@
         notes: otherDetails.length ? `[其他工班] ${otherDetails.join('、')}` : ""
       };
 
-      // 5. 更新預覽卡片
+      // 6. 更新介面
       document.getElementById('parsedSite').innerText = '案名：' + parsedResult.site;
       document.getElementById('parsedTask').innerText = parsedResult.mainTask;
 
@@ -328,7 +350,6 @@
       }
 
       parsedResult.date = document.getElementById('logDate').value;
-
       document.getElementById('sendBtn').innerText = '正在存入試算表...';
       document.getElementById('sendBtn').disabled = true;
 

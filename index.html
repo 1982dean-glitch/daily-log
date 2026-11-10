@@ -7,236 +7,41 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>施工日誌速記</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-    body {
-      background-color: #f1f5f9;
-      min-height: 100vh;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      user-select: none;
-    }
-    .container {
-      width: 100%;
-      max-width: 448px;
-      background: #ffffff;
-      border-radius: 16px;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #e2e8f0;
-      padding-bottom: 12px;
-    }
-    .header h1 {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: #1e293b;
-    }
-    .badge {
-      font-size: 12px;
-      padding: 2px 10px;
-      background: #dcfce7;
-      color: #15803d;
-      border-radius: 9999px;
-      font-weight: 600;
-    }
-    details {
-      font-size: 12px;
-      color: #64748b;
-      background: #f8fafc;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #e2e8f0;
-    }
-    summary {
-      cursor: pointer;
-      font-weight: 600;
-      color: #334155;
-    }
-    .config-body {
-      margin-top: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    input[type="text"], input[type="date"], textarea {
-      width: 100%;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      padding: 8px;
-      font-size: 14px;
-      color: #1e293b;
-      background: #ffffff;
-      outline: none;
-    }
-    input[type="text"]:focus, input[type="date"]:focus, textarea:focus {
-      border-color: #2563eb;
-    }
-    .btn-secondary {
-      background: #334155;
-      color: #ffffff;
-      padding: 6px;
-      border-radius: 6px;
-      font-weight: 500;
-      border: none;
-      cursor: pointer;
-    }
-    .mic-section {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 8px 0;
-    }
-    .mic-btn {
-      width: 96px;
-      height: 96px;
-      border-radius: 50%;
-      background: #2563eb;
-      color: #ffffff;
-      border: none;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.35);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .mic-btn:active {
-      transform: scale(0.95);
-    }
-    .mic-btn.recording {
-      background: #ef4444 !0;
-      background-color: #ef4444;
-      animation: pulse 1.5s infinite;
-      box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.4);
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.05); opacity: 0.85; }
-    }
-    .mic-btn svg {
-      width: 40px;
-      height: 40px;
-      fill: currentColor;
-    }
-    .mic-btn span {
-      font-size: 12px;
-      margin-top: 4px;
-    }
-    .sub-hint {
-      font-size: 12px;
-      color: #94a3b8;
-      margin-top: 8px;
-    }
-    .label-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 4px;
-    }
-    .label-row label {
-      font-size: 12px;
-      font-weight: 600;
-      color: #475569;
-    }
-    .link-btn {
-      font-size: 12px;
-      color: #2563eb;
-      background: none;
-      border: none;
-      text-decoration: underline;
-      cursor: pointer;
-    }
-    .preview-card {
-      border: 1px solid #bfdbfe;
-      background: #eff6ff;
-      border-radius: 12px;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .card-title-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .card-title-row strong {
-      font-size: 12px;
-      color: #1e3a8a;
-    }
-    .site-tag {
-      font-size: 12px;
-      font-weight: 700;
-      background: #bfdbfe;
-      color: #1e40af;
-      padding: 2px 8px;
-      border-radius: 4px;
-    }
-    .date-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 12px;
-      background: #ffffff;
-      padding: 6px 10px;
-      border-radius: 8px;
-      border: 1px solid #dbeafe;
-    }
-    .date-row span {
-      font-weight: 600;
-      color: #334155;
-    }
-    .date-row input[type="date"] {
-      width: auto;
-      padding: 2px 6px;
-      font-size: 12px;
-    }
-    .details-list {
-      font-size: 12px;
-      color: #475569;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .details-list div span {
-      color: #0f172a;
-      font-weight: 600;
-    }
-    .btn-submit {
-      width: 100%;
-      background: #1e293b;
-      color: #ffffff;
-      padding: 12px;
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .btn-submit:hover {
-      background: #0f172a;
-    }
-    .btn-submit:disabled {
-      background: #94a3b8;
-      cursor: not-allowed;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: #f1f5f9; min-height: 100vh; padding: 16px; display: flex; flex-direction: column; align-items: center; user-select: none; }
+    .container { width: 100%; max-width: 448px; background: #fff; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; }
+    .header h1 { font-size: 1.15rem; font-weight: 700; color: #1e293b; }
+    .badge { font-size: 12px; padding: 2px 10px; background: #dcfce7; color: #15803d; border-radius: 9999px; font-weight: 600; }
+    details { font-size: 12px; color: #64748b; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; }
+    summary { cursor: pointer; font-weight: 600; color: #334155; }
+    .config-body { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+    input[type="text"], input[type="date"], textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px; font-size: 14px; color: #1e293b; background: #fff; outline: none; }
+    input:focus, textarea:focus { border-color: #2563eb; }
+    .btn-secondary { background: #334155; color: #fff; padding: 6px; border-radius: 6px; font-weight: 500; border: none; cursor: pointer; }
+    .mic-section { display: flex; flex-direction: column; align-items: center; padding: 8px 0; }
+    .mic-btn { width: 96px; height: 96px; border-radius: 50%; background: #2563eb; color: #fff; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(37,99,235,0.35); cursor: pointer; transition: all 0.2s ease; }
+    .mic-btn:active { transform: scale(0.95); }
+    .mic-btn.recording { background-color: #ef4444; animation: pulse 1.5s infinite; box-shadow: 0 10px 15px -3px rgba(239,68,68,0.4); }
+    @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.85; } }
+    .mic-btn svg { width: 40px; height: 40px; fill: currentColor; }
+    .mic-btn span { font-size: 12px; margin-top: 4px; }
+    .sub-hint { font-size: 12px; color: #94a3b8; margin-top: 8px; }
+    .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .label-row label { font-size: 12px; font-weight: 600; color: #475569; }
+    .link-btn { font-size: 12px; color: #2563eb; background: none; border: none; text-decoration: underline; cursor: pointer; }
+    .preview-card { border: 1px solid #bfdbfe; background: #eff6ff; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .card-title-row { display: flex; justify-content: space-between; align-items: center; }
+    .card-title-row strong { font-size: 12px; color: #1e3a8a; }
+    .site-tag { font-size: 12px; font-weight: 700; background: #bfdbfe; color: #1e40af; padding: 2px 8px; border-radius: 4px; }
+    .date-row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; background: #fff; padding: 6px 10px; border-radius: 8px; border: 1px solid #dbeafe; }
+    .date-row span { font-weight: 600; color: #334155; }
+    .date-row input[type="date"] { width: auto; padding: 2px 6px; font-size: 12px; }
+    .details-list { font-size: 12px; color: #475569; display: flex; flex-direction: column; gap: 4px; }
+    .details-list div span { color: #0f172a; font-weight: 600; }
+    .btn-submit { width: 100%; background: #1e293b; color: #fff; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; transition: background 0.2s; }
+    .btn-submit:hover { background: #0f172a; }
+    .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -272,7 +77,7 @@
         <label>辨識文字（可手動修改）：</label>
         <button onclick="reParseManual()" class="link-btn">手動修改後重解</button>
       </div>
-      <textarea id="voiceText" rows="2" placeholder="例：永和國光昨天泥作2人門框填縫、木工1人貼皮"></textarea>
+      <textarea id="voiceText" rows="2" placeholder="例：永和國光今天泥作2人、防水1人施作窗框防水"></textarea>
     </div>
 
     <!-- 結構化預覽卡片 -->
@@ -282,7 +87,6 @@
         <span id="parsedSite" class="site-tag">案名：永和國光</span>
       </div>
 
-      <!-- 日期調整欄位 -->
       <div class="date-row">
         <span>📅 記錄日期：</span>
         <input id="logDate" type="date">
@@ -291,6 +95,7 @@
       <div class="details-list">
         <div>• 施作工項：<span id="parsedTask">-</span></div>
         <div>• 出工人數：<span id="parsedWorkers">-</span></div>
+        <div>• 其他備註：<span id="parsedNotes">-</span></div>
       </div>
     </div>
 
@@ -305,8 +110,10 @@
     let isRecording = false;
     let parsedResult = null;
 
-    // 試算表 D ~ L 欄工種順序
-    const JOBS = ["大工", "小工", "隔間", "油漆", "木工", "金屬", "泥作", "機電", "清運"];
+    // 標準 9 大工種 (對齊試算表 D ~ L 欄)
+    const STANDARD_JOBS = ["大工", "小工", "隔間", "油漆", "木工", "金屬", "泥作", "機電", "清運"];
+    
+    // 中文數字換算字典
     const CHINESE_NUMS = {
       '零': 0, '一': 1, '二': 2, '兩': 2, '三': 3, '四': 4,
       '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10,
@@ -335,7 +142,7 @@
     function initSpeech() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
-        alert('警告：此瀏覽器不支援語音辨識 API，請使用 Chrome 瀏覽器開啟！');
+        alert('此瀏覽器不支援語音辨識 API，請使用 Chrome 開啟！');
         return false;
       }
       
@@ -364,9 +171,9 @@
         recognition.onerror = (e) => {
           stopRecordingUI();
           if (e.error === 'not-allowed') {
-            alert('麥克風被封鎖！請點擊網址列左側的鎖頭圖示，將「麥克風」改為「允許」。');
+            alert('麥克風被封鎖！請開啟麥克風權限。');
           } else if (e.error !== 'no-speech') {
-            alert('語音中斷代碼：' + e.error);
+            alert('語音中斷：' + e.error);
           }
         };
 
@@ -410,11 +217,11 @@
       if (text) parseLocally(text);
     }
 
-    // 手機本機純 JavaScript 極速解析引擎
+    // 本地多工種智能解析 (含標準工種與非標準「其他」出工分類)
     function parseLocally(speechText) {
       document.getElementById('statusTag').innerText = '解析完成';
 
-      // 1. 日期智能判定（昨天、前天、指定月日、或維持今天）
+      // 1. 日期智能判定
       let targetDate = new Date();
       if (speechText.includes("昨天") || speechText.includes("昨日")) {
         targetDate.setDate(targetDate.getDate() - 1);
@@ -430,7 +237,7 @@
       }
       setTargetDate(targetDate);
 
-      // 2. 案名比對
+      // 2. 案名判定
       let detectedSite = "永和國光";
       if (speechText.includes("板橋")) {
         detectedSite = "板橋電銷";
@@ -440,37 +247,61 @@
         detectedSite = "三重捷運路";
       }
 
-      // 3. 工種出工人數提取
+      // 3. 工種出工人數提取（標準 + 非標準自動歸入「其他」）
       let workers = {};
-      JOBS.forEach(j => workers[j] = 0);
+      STANDARD_JOBS.forEach(j => workers[j] = 0);
+      let otherWorkers = 0;
+      let otherDetails = [];
 
-      JOBS.forEach(job => {
-        const pattern = new RegExp(`${job}\\s*([0-9]+(?:\\.[0-9]+)?|[一二兩三四五六七八九十半])\\s*(?:人|個|位|車)?`, 'i');
-        const match = speechText.match(pattern);
-        if (match) {
-          const rawNum = match[1];
-          workers[job] = CHINESE_NUMS[rawNum] !== undefined ? CHINESE_NUMS[rawNum] : (parseFloat(rawNum) || 0);
+      // 泛用工種正規式：抓取「[工種名稱 2~4 字] + [人數] + 人/位/個」
+      const generalJobPattern = /([\u4e00-\u9fa5]{2,4})\s*([0-9]+(?:\.[0-9]+)?|[一二兩三四五六七八九十半])\s*(?:人|個|位|車)?/g;
+      let match;
+      let extractedWords = [];
+
+      while ((match = generalJobPattern.exec(speechText)) !== null) {
+        const jobName = match[1];
+        const rawNum = match[2];
+        const count = CHINESE_NUMS[rawNum] !== undefined ? CHINESE_NUMS[rawNum] : (parseFloat(rawNum) || 0);
+
+        // 避免將「今天2人」、「工程1人」等非工種字眼誤判
+        if (["今天", "昨天", "昨日", "前天", "工程", "現場", "施作", "案場", "工地"].includes(jobName)) {
+          continue;
         }
-      });
 
-      // 4. 清理文字提取施工工項
+        extractedWords.push(match[0]);
+
+        if (STANDARD_JOBS.includes(jobName)) {
+          workers[jobName] = (workers[jobName] || 0) + count;
+        } else {
+          // 不在 9 大工種中，歸入「其他」
+          otherWorkers += count;
+          otherDetails.push(`${jobName}: ${count}人`);
+        }
+      }
+
+      // 4. 清理文字提取主要工項
       let cleanTask = speechText
         .replace(/(永和國光|板橋電銷|三重捷運路|永和案|板橋案|案場|工地)/g, '')
-        .replace(/(今天|本日|昨日|昨天|前天|前日|\d{1,2}[月\/]\d{1,2}[號日]?)/g, '')
-        .replace(/(大工|小工|隔間|油漆|木工|金屬|泥作|機電|清運)\s*([0-9]+(?:\.[0-9]+)?|[一二兩三四五六七八九十半])\s*(?:人|個|位|車)?/g, '')
-        .replace(/[，,。、\s]+/g, ' ')
-        .trim();
+        .replace(/(今天|本日|昨日|昨天|前天|前日|\d{1,2}[月\/]\d{1,2}[號日]?)/g, '');
+
+      // 移除已提取的工種出工字眼
+      extractedWords.forEach(w => {
+        cleanTask = cleanTask.replace(w, '');
+      });
+      cleanTask = cleanTask.replace(/[，,。、\s]+/g, ' ').trim();
 
       parsedResult = {
         site: detectedSite,
         date: document.getElementById('logDate').value,
         workers: workers,
+        otherWorkers: otherWorkers,
+        otherDetails: otherDetails.join('、'),
         mainTask: cleanTask || "現場施作",
         subTask: "",
-        notes: ""
+        notes: otherDetails.length ? `[其他工班] ${otherDetails.join('、')}` : ""
       };
 
-      // 5. 更新卡片畫面
+      // 5. 更新預覽卡片
       document.getElementById('parsedSite').innerText = '案名：' + parsedResult.site;
       document.getElementById('parsedTask').innerText = parsedResult.mainTask;
 
@@ -478,13 +309,17 @@
       for (const [job, count] of Object.entries(parsedResult.workers)) {
         if (count > 0) workerList.push(`${job}: ${count}人`);
       }
+      if (otherWorkers > 0) {
+        workerList.push(`其他: ${otherWorkers}人 (${otherDetails.join('、')})`);
+      }
       document.getElementById('parsedWorkers').innerText = workerList.length ? workerList.join('、') : '無出工';
+      document.getElementById('parsedNotes').innerText = parsedResult.notes || '無';
     }
 
     async function sendToCloud() {
       const gasUrl = (localStorage.getItem('gas_backend_url') || '').trim();
       if (!gasUrl) {
-        alert('請先在設定中填入 GAS 後端網址！');
+        alert('請先在設定中填入 GAS 網址！');
         return;
       }
       if (!parsedResult) {
@@ -492,7 +327,6 @@
         return;
       }
 
-      // 同步以使用者目前畫面上選取的日期為準
       parsedResult.date = document.getElementById('logDate').value;
 
       document.getElementById('sendBtn').innerText = '正在存入試算表...';
@@ -506,11 +340,11 @@
         const resp = await res.json();
         alert(resp.message || '已成功儲存至 Google 試算表！');
         
-        // 成功後重設介面
         document.getElementById('voiceText').value = '';
         parsedResult = null;
         document.getElementById('parsedTask').innerText = '-';
         document.getElementById('parsedWorkers').innerText = '-';
+        document.getElementById('parsedNotes').innerText = '-';
         document.getElementById('statusTag').innerText = '本機極速版';
         setTargetDate(new Date());
       } catch (e) {

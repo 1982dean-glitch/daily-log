@@ -9,7 +9,7 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background-color: #f1f5f9; min-height: 100vh; padding: 16px; display: flex; flex-direction: column; align-items: center; user-select: none; }
-    .container { width: 100%; max-width: 448px; background: #fff; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+    .container { width: 100%; max-width: 448px; background: #fff; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); padding: 20px; display: flex; flex-direction: column; gap: 14px; }
     .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; }
     .header h1 { font-size: 1.15rem; font-weight: 700; color: #1e293b; }
     .badge { font-size: 12px; padding: 2px 10px; background: #dcfce7; color: #15803d; border-radius: 9999px; font-weight: 600; }
@@ -19,12 +19,12 @@
     input[type="text"], input[type="date"], textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px; font-size: 14px; color: #1e293b; background: #fff; outline: none; }
     input:focus, textarea:focus { border-color: #2563eb; }
     .btn-secondary { background: #334155; color: #fff; padding: 6px; border-radius: 6px; font-weight: 500; border: none; cursor: pointer; }
-    .mic-section { display: flex; flex-direction: column; align-items: center; padding: 8px 0; }
-    .mic-btn { width: 96px; height: 96px; border-radius: 50%; background: #2563eb; color: #fff; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(37,99,235,0.35); cursor: pointer; transition: all 0.2s ease; }
+    .mic-section { display: flex; flex-direction: column; align-items: center; padding: 6px 0; }
+    .mic-btn { width: 92px; height: 92px; border-radius: 50%; background: #2563eb; color: #fff; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(37,99,235,0.35); cursor: pointer; transition: all 0.2s ease; }
     .mic-btn:active { transform: scale(0.95); }
     .mic-btn.recording { background-color: #ef4444; animation: pulse 1.5s infinite; box-shadow: 0 10px 15px -3px rgba(239,68,68,0.4); }
     @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.85; } }
-    .mic-btn svg { width: 40px; height: 40px; fill: currentColor; }
+    .mic-btn svg { width: 38px; height: 38px; fill: currentColor; }
     .mic-btn span { font-size: 12px; margin-top: 4px; }
     .sub-hint { font-size: 12px; color: #94a3b8; margin-top: 8px; }
     .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
@@ -37,11 +37,19 @@
     .date-row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; background: #fff; padding: 6px 10px; border-radius: 8px; border: 1px solid #dbeafe; }
     .date-row span { font-weight: 600; color: #334155; }
     .date-row input[type="date"] { width: auto; padding: 2px 6px; font-size: 12px; }
+    
+    /* 模式切換按鈕組 */
+    .mode-group { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: #dbeafe; padding: 4px; border-radius: 8px; }
+    .mode-btn { padding: 6px 4px; font-size: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; background: transparent; color: #1e40af; transition: all 0.15s; }
+    .mode-btn.active-append { background: #16a34a; color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+    .mode-btn.active-overwrite { background: #ea580c; color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+
     .details-list { font-size: 12px; color: #475569; display: flex; flex-direction: column; gap: 4px; }
     .details-list div span { color: #0f172a; font-weight: 600; }
-    .btn-submit { width: 100%; background: #1e293b; color: #fff; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; transition: background 0.2s; }
-    .btn-submit:hover { background: #0f172a; }
+    .action-row { display: flex; gap: 8px; }
+    .btn-submit { flex: 1; background: #1e293b; color: #fff; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; transition: background 0.2s; }
     .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-delete { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; padding: 0 14px; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -51,7 +59,6 @@
       <span id="statusTag" class="badge">本機極速版</span>
     </div>
 
-    <!-- 系統設定展開 -->
     <details>
       <summary>⚙️ 雲端寫入網址設定</summary>
       <div class="config-body">
@@ -62,25 +69,22 @@
       </div>
     </details>
 
-    <!-- 語音輸入按鈕區 -->
     <div class="mic-section">
       <button id="micBtn" onclick="handleBtnClick()" class="mic-btn">
         <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
         <span id="btnText">點擊說話</span>
       </button>
-      <p id="subHint" class="sub-hint">點一下開始說話，說完再點一下</p>
+      <p id="subHint" class="sub-hint">說「修正」自動覆蓋，否則預設累加</p>
     </div>
 
-    <!-- 辨識文字與手動修改區 -->
     <div>
       <div class="label-row">
         <label>辨識文字（可手動修改）：</label>
         <button onclick="reParseManual()" class="link-btn">手動修改後重解</button>
       </div>
-      <textarea id="voiceText" rows="2" placeholder="例：永和國光今天木工2人、水電1人、防水1人配管及防水施作"></textarea>
+      <textarea id="voiceText" rows="2" placeholder="例：永和國光今天木工2人釘天花板（預設累加，說「修正」則覆蓋）"></textarea>
     </div>
 
-    <!-- 結構化預覽卡片 -->
     <div class="preview-card">
       <div class="card-title-row">
         <strong>⚡ 本地秒級解析結果</strong>
@@ -92,6 +96,12 @@
         <input id="logDate" type="date">
       </div>
 
+      <!-- 寫入模式切換開關 -->
+      <div class="mode-group">
+        <button id="btnModeAppend" type="button" onclick="setWriteMode('append')" class="mode-btn active-append">➕ 累加至當日 (保留舊資料)</button>
+        <button id="btnModeOverwrite" type="button" onclick="setWriteMode('overwrite')" class="mode-btn">✏️ 覆蓋修正 (取代當日)</button>
+      </div>
+
       <div class="details-list">
         <div>• 施作工項：<span id="parsedTask">-</span></div>
         <div>• 出工人數：<span id="parsedWorkers">-</span></div>
@@ -99,18 +109,18 @@
       </div>
     </div>
 
-    <!-- 送出按鈕 -->
-    <button id="sendBtn" onclick="sendToCloud()" class="btn-submit">
-      確認並儲存至雲端
-    </button>
+    <div class="action-row">
+      <button id="sendBtn" onclick="sendToCloud()" class="btn-submit">➕ 累加儲存至雲端</button>
+      <button id="delBtn" onclick="deleteDayLog()" class="btn-delete" title="清空該日期所有紀錄">🗑️ 清空</button>
+    </div>
   </div>
 
   <script>
     let recognition = null;
     let isRecording = false;
     let parsedResult = null;
+    let currentMode = 'append'; // 預設為累加模式 ('append' | 'overwrite')
 
-    // 9 大基本工項標準定義與涵蓋別名
     const STANDARD_JOBS_CONFIG = [
       { name: "大工", aliases: ["大工"] },
       { name: "小工", aliases: ["小工", "雜工"] },
@@ -123,7 +133,6 @@
       { name: "清運", aliases: ["清運", "清潔", "垃圾車", "廢料清運", "清運車"] }
     ];
 
-    // 全域基本工項黑名單：確保「其他」絕不納入任何基本工種
     const ALL_STANDARD_KEYWORDS = STANDARD_JOBS_CONFIG.flatMap(j => [j.name, ...j.aliases]);
 
     const CHINESE_NUMS = {
@@ -135,8 +144,29 @@
     window.onload = () => {
       document.getElementById('gasUrl').value = localStorage.getItem('gas_backend_url') || '';
       setTargetDate(new Date());
+      setWriteMode('append');
       initSpeech();
     };
+
+    function setWriteMode(mode) {
+      currentMode = mode;
+      const btnAppend = document.getElementById('btnModeAppend');
+      const btnOverwrite = document.getElementById('btnModeOverwrite');
+      const sendBtn = document.getElementById('sendBtn');
+
+      if (mode === 'append') {
+        btnAppend.className = 'mode-btn active-append';
+        btnOverwrite.className = 'mode-btn';
+        sendBtn.innerText = '➕ 累加儲存至雲端';
+        sendBtn.style.backgroundColor = '#1e293b';
+      } else {
+        btnAppend.className = 'mode-btn';
+        btnOverwrite.className = 'mode-btn active-overwrite';
+        sendBtn.innerText = '✏️ 覆蓋修正至雲端';
+        sendBtn.style.backgroundColor = '#c2410c';
+      }
+      if (parsedResult) parsedResult.mode = mode;
+    }
 
     function setTargetDate(dateObj) {
       const year = dateObj.getFullYear();
@@ -153,11 +183,7 @@
 
     function initSpeech() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) {
-        alert('此瀏覽器不支援語音辨識 API，請使用 Chrome 開啟！');
-        return false;
-      }
-      
+      if (!SpeechRecognition) return false;
       try {
         recognition = new SpeechRecognition();
         recognition.lang = 'zh-TW';
@@ -168,7 +194,6 @@
           isRecording = true;
           document.getElementById('micBtn').classList.add('recording');
           document.getElementById('btnText').innerText = '正在聆聽...';
-          document.getElementById('subHint').innerText = '說完請再點一下按鈕';
           document.getElementById('statusTag').innerText = '聆聽中...';
         };
 
@@ -182,11 +207,7 @@
 
         recognition.onerror = (e) => {
           stopRecordingUI();
-          if (e.error === 'not-allowed') {
-            alert('麥克風被封鎖！請開啟麥克風權限。');
-          } else if (e.error !== 'no-speech') {
-            alert('語音中斷：' + e.error);
-          }
+          if (e.error === 'not-allowed') alert('請開啟麥克風權限！');
         };
 
         recognition.onend = () => stopRecordingUI();
@@ -197,18 +218,9 @@
     }
 
     function handleBtnClick() {
-      if (!recognition) {
-        const ok = initSpeech();
-        if (!ok) return;
-      }
-
+      if (!recognition && !initSpeech()) return;
       if (!isRecording) {
-        try {
-          recognition.start();
-        } catch (err) {
-          recognition.stop();
-          setTimeout(() => { try { recognition.start(); } catch(e) {} }, 300);
-        }
+        try { recognition.start(); } catch (err) { recognition.stop(); setTimeout(() => recognition.start(), 300); }
       } else {
         recognition.stop();
       }
@@ -218,7 +230,6 @@
       isRecording = false;
       document.getElementById('micBtn').classList.remove('recording');
       document.getElementById('btnText').innerText = '點擊說話';
-      document.getElementById('subHint').innerText = '點一下開始說話，說完再點一下';
       if (document.getElementById('statusTag').innerText === '聆聽中...') {
         document.getElementById('statusTag').innerText = '本機極速版';
       }
@@ -229,11 +240,17 @@
       if (text) parseLocally(text);
     }
 
-    // 嚴格兩階段解析：基本工項歸位 + 非基本工項分流
     function parseLocally(speechText) {
       document.getElementById('statusTag').innerText = '解析完成';
 
-      // 1. 日期智能判定
+      // 0. 語音偵測寫入模式（說「修正/覆蓋/改成/更正」自動切換為覆蓋，否則預設累加）
+      if (/(修正|更正|覆蓋|改成)/.test(speechText)) {
+        setWriteMode('overwrite');
+      } else {
+        setWriteMode('append');
+      }
+
+      // 1. 日期判定
       let targetDate = new Date();
       if (speechText.includes("昨天") || speechText.includes("昨日")) {
         targetDate.setDate(targetDate.getDate() - 1);
@@ -242,26 +259,20 @@
       } else {
         const dateMatch = speechText.match(/(\d{1,2})[月\/](\d{1,2})[號日]?/);
         if (dateMatch) {
-          const m = parseInt(dateMatch[1], 10) - 1;
-          const d = parseInt(dateMatch[2], 10);
-          targetDate.setMonth(m, d);
+          targetDate.setMonth(parseInt(dateMatch[1], 10) - 1, parseInt(dateMatch[2], 10));
         }
       }
       setTargetDate(targetDate);
 
       // 2. 案名判定
       let detectedSite = "永和國光";
-      if (speechText.includes("板橋")) {
-        detectedSite = "板橋電銷";
-      } else if (speechText.includes("永和") || speechText.includes("國光")) {
-        detectedSite = "永和國光";
-      } else if (speechText.includes("三重") || speechText.includes("捷運")) {
-        detectedSite = "三重捷運路";
-      }
+      if (speechText.includes("板橋")) detectedSite = "板橋電銷";
+      else if (speechText.includes("永和") || speechText.includes("國光")) detectedSite = "永和國光";
+      else if (speechText.includes("三重") || speechText.includes("捷運")) detectedSite = "三重捷運路";
 
       let remainingText = speechText;
 
-      // 3. 第一階段：優先提取 9 大基本工項（鎖定 D~L 專屬欄位）
+      // 3. 提取 9 大基本工項
       let workers = {};
       STANDARD_JOBS_CONFIG.forEach(job => {
         workers[job.name] = 0;
@@ -270,14 +281,12 @@
         const match = remainingText.match(regex);
         if (match) {
           const rawNum = match[1];
-          const count = CHINESE_NUMS[rawNum] !== undefined ? CHINESE_NUMS[rawNum] : (parseFloat(rawNum) || 0);
-          workers[job.name] = count;
-          // 自文字中抹除已歸類的標準工項
+          workers[job.name] = CHINESE_NUMS[rawNum] !== undefined ? CHINESE_NUMS[rawNum] : (parseFloat(rawNum) || 0);
           remainingText = remainingText.replace(match[0], ' ');
         }
       });
 
-      // 4. 第二階段：提取真正的新工項（黑名單嚴格過濾）
+      // 4. 提取新工項歸入「其他」
       let otherWorkers = 0;
       let otherDetails = [];
       const customJobPattern = /([\u4e00-\u9fa5]{2,4})\s*([0-9]+(?:\.[0-9]+)?|[一二兩三四五六七八九十半])\s*(?:人|個|位|車)?/g;
@@ -288,15 +297,12 @@
         const rawNum = customMatch[2];
         const count = CHINESE_NUMS[rawNum] !== undefined ? CHINESE_NUMS[rawNum] : (parseFloat(rawNum) || 0);
 
-        // 規則 A：包含任何 9 大基本工項字眼，絕對不計入「其他」
         const isStandardJob = ALL_STANDARD_KEYWORDS.some(kw => jobName.includes(kw) || kw.includes(jobName));
         if (isStandardJob) {
           remainingText = remainingText.replace(customMatch[0], ' ');
           continue;
         }
-
-        // 規則 B：排除非工種常用詞
-        if (["今天", "昨天", "昨日", "前天", "工程", "現場", "施作", "案場", "工地", "合計", "總共"].includes(jobName)) {
+        if (["今天", "昨天", "昨日", "前天", "工程", "現場", "施作", "案場", "工地", "合計", "總共", "修正", "更正", "覆蓋"].includes(jobName)) {
           continue;
         }
 
@@ -305,27 +311,29 @@
         remainingText = remainingText.replace(customMatch[0], ' ');
       }
 
-      // 5. 提取施作內容（工項乾淨化）
+      // 5. 清理施作內容（過濾模式指令字眼）
       let cleanTask = remainingText
         .replace(/(永和國光|板橋電銷|三重捷運路|永和案|板橋案|案場|工地)/g, '')
         .replace(/(今天|本日|昨日|昨天|前天|前日|\d{1,2}[月\/]\d{1,2}[號日]?)/g, '')
+        .replace(/(修正|更正|覆蓋|改成|追加|新增)/g, '')
         .replace(/[，,。、\s]+/g, ' ')
         .trim();
 
       parsedResult = {
         site: detectedSite,
         date: document.getElementById('logDate').value,
+        mode: currentMode,
         workers: workers,
         otherWorkers: otherWorkers,
         otherDetails: otherDetails.join('、'),
-        mainTask: cleanTask || "現場施作",
+        mainTask: cleanTask || "",
         subTask: "",
         notes: otherDetails.length ? `[其他工班] ${otherDetails.join('、')}` : ""
       };
 
-      // 6. 更新介面
+      // 6. 更新卡片
       document.getElementById('parsedSite').innerText = '案名：' + parsedResult.site;
-      document.getElementById('parsedTask').innerText = parsedResult.mainTask;
+      document.getElementById('parsedTask').innerText = parsedResult.mainTask || '(無新增工項文字)';
 
       let workerList = [];
       for (const [job, count] of Object.entries(parsedResult.workers)) {
@@ -340,39 +348,59 @@
 
     async function sendToCloud() {
       const gasUrl = (localStorage.getItem('gas_backend_url') || '').trim();
-      if (!gasUrl) {
-        alert('請先在設定中填入 GAS 網址！');
-        return;
-      }
-      if (!parsedResult) {
-        alert('尚未有解析資料，請先錄音或手動輸入！');
-        return;
-      }
+      if (!gasUrl) return alert('請先在設定中填入 GAS 網址！');
+      if (!parsedResult) return alert('尚未有解析資料，請先錄音或手動輸入！');
 
       parsedResult.date = document.getElementById('logDate').value;
-      document.getElementById('sendBtn').innerText = '正在存入試算表...';
-      document.getElementById('sendBtn').disabled = true;
+      parsedResult.mode = currentMode;
+
+      const sendBtn = document.getElementById('sendBtn');
+      sendBtn.innerText = '正在同步至試算表...';
+      sendBtn.disabled = true;
 
       try {
-        const res = await fetch(gasUrl, {
-          method: 'POST',
-          body: JSON.stringify(parsedResult)
-        });
+        const res = await fetch(gasUrl, { method: 'POST', body: JSON.stringify(parsedResult) });
         const resp = await res.json();
-        alert(resp.message || '已成功儲存至 Google 試算表！');
-        
+        alert(resp.message || '已完成同步！');
+
         document.getElementById('voiceText').value = '';
         parsedResult = null;
         document.getElementById('parsedTask').innerText = '-';
         document.getElementById('parsedWorkers').innerText = '-';
         document.getElementById('parsedNotes').innerText = '-';
         document.getElementById('statusTag').innerText = '本機極速版';
-        setTargetDate(new Date());
+        setWriteMode('append');
       } catch (e) {
-        alert('已送出請求！請檢查試算表對應日期是否已更新。');
+        alert('已送出請求！請查看試算表對應日期是否已更新。');
       } finally {
-        document.getElementById('sendBtn').innerText = '確認並儲存至雲端';
-        document.getElementById('sendBtn').disabled = false;
+        setWriteMode(currentMode);
+        sendBtn.disabled = false;
+      }
+    }
+
+    async function deleteDayLog() {
+      const gasUrl = (localStorage.getItem('gas_backend_url') || '').trim();
+      if (!gasUrl) return alert('請先在設定中填入 GAS 網址！');
+
+      const siteText = document.getElementById('parsedSite').innerText.replace('案名：', '').trim();
+      const targetDate = document.getElementById('logDate').value;
+
+      if (!confirm(`確定要清空【${siteText}】在 ${targetDate} 的所有出工與施工項目嗎？`)) return;
+
+      const delBtn = document.getElementById('delBtn');
+      delBtn.disabled = true;
+
+      try {
+        const res = await fetch(gasUrl, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'delete', site: siteText, date: targetDate })
+        });
+        const resp = await res.json();
+        alert(resp.message || '已清空當日紀錄！');
+      } catch (e) {
+        alert('已送出清空請求！');
+      } finally {
+        delBtn.disabled = false;
       }
     }
   </script>

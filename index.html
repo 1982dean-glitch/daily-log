@@ -13,12 +13,27 @@
     .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; }
     .header h1 { font-size: 1.15rem; font-weight: 700; color: #1e293b; }
     .badge { font-size: 12px; padding: 2px 10px; background: #dcfce7; color: #15803d; border-radius: 9999px; font-weight: 600; }
+    
     details { font-size: 12px; color: #64748b; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; }
     summary { cursor: pointer; font-weight: 600; color: #334155; }
-    .config-body { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
-    input[type="text"], input[type="date"], textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px; font-size: 14px; color: #1e293b; background: #fff; outline: none; }
-    input:focus, textarea:focus { border-color: #2563eb; }
-    .btn-secondary { background: #334155; color: #fff; padding: 6px; border-radius: 6px; font-weight: 500; border: none; cursor: pointer; }
+    .config-body { margin-top: 10px; display: flex; flex-direction: column; gap: 12px; }
+    .config-section { display: flex; flex-direction: column; gap: 6px; padding-top: 8px; border-top: 1px dashed #cbd5e1; }
+    .config-section:first-child { padding-top: 0; border-top: none; }
+    .config-title { font-weight: 700; color: #1e293b; font-size: 12px; }
+
+    input[type="text"], input[type="date"], textarea, select { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px; font-size: 13px; color: #1e293b; background: #fff; outline: none; }
+    input:focus, textarea:focus, select:focus { border-color: #2563eb; }
+    .btn-secondary { background: #334155; color: #fff; padding: 7px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; font-size: 12px; }
+    .btn-add-site { background: #2563eb; color: #fff; padding: 7px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; font-size: 12px; }
+
+    /* 已儲存工地清單 */
+    .site-list { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+    .site-item { display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid #e2e8f0; padding: 6px 8px; border-radius: 6px; font-size: 12px; }
+    .site-item-info { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
+    .site-item-name { font-weight: 700; color: #0f172a; }
+    .site-item-sub { font-size: 11px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .btn-remove-site { background: #fee2e2; color: #dc2626; border: none; border-radius: 4px; padding: 3px 7px; font-size: 11px; font-weight: 700; cursor: pointer; flex-shrink: 0; margin-left: 8px; }
+
     .mic-section { display: flex; flex-direction: column; align-items: center; padding: 6px 0; }
     .mic-btn { width: 92px; height: 92px; border-radius: 50%; background: #2563eb; color: #fff; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(37,99,235,0.35); cursor: pointer; transition: all 0.2s ease; }
     .mic-btn:active { transform: scale(0.95); }
@@ -27,18 +42,20 @@
     .mic-btn svg { width: 38px; height: 38px; fill: currentColor; }
     .mic-btn span { font-size: 12px; margin-top: 4px; }
     .sub-hint { font-size: 12px; color: #94a3b8; margin-top: 8px; }
+
     .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
     .label-row label { font-size: 12px; font-weight: 600; color: #475569; }
     .link-btn { font-size: 12px; color: #2563eb; background: none; border: none; text-decoration: underline; cursor: pointer; }
+
     .preview-card { border: 1px solid #bfdbfe; background: #eff6ff; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-    .card-title-row { display: flex; justify-content: space-between; align-items: center; }
-    .card-title-row strong { font-size: 12px; color: #1e3a8a; }
-    .site-tag { font-size: 12px; font-weight: 700; background: #bfdbfe; color: #1e40af; padding: 2px 8px; border-radius: 4px; }
+    .card-title-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .card-title-row strong { font-size: 12px; color: #1e3a8a; white-space: nowrap; }
+    .site-select { width: auto; max-width: 170px; padding: 3px 8px; font-size: 12px; font-weight: 700; background: #bfdbfe; color: #1e40af; border: 1px solid #93c5fd; border-radius: 6px; }
+
     .date-row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; background: #fff; padding: 6px 10px; border-radius: 8px; border: 1px solid #dbeafe; }
     .date-row span { font-weight: 600; color: #334155; }
     .date-row input[type="date"] { width: auto; padding: 2px 6px; font-size: 12px; }
-    
-    /* 模式切換按鈕組 */
+
     .mode-group { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: #dbeafe; padding: 4px; border-radius: 8px; }
     .mode-btn { padding: 6px 4px; font-size: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; background: transparent; color: #1e40af; transition: all 0.15s; }
     .mode-btn.active-append { background: #16a34a; color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
@@ -46,6 +63,7 @@
 
     .details-list { font-size: 12px; color: #475569; display: flex; flex-direction: column; gap: 4px; }
     .details-list div span { color: #0f172a; font-weight: 600; }
+
     .action-row { display: flex; gap: 8px; }
     .btn-submit { flex: 1; background: #1e293b; color: #fff; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; transition: background 0.2s; }
     .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; }
@@ -59,16 +77,35 @@
       <span id="statusTag" class="badge">本機極速版</span>
     </div>
 
+    <!-- 系統設定與工地管理展開區 -->
     <details>
-      <summary>⚙️ 雲端寫入網址設定</summary>
+      <summary>⚙️ 雲端網址與工地管理 (新增/刪除工地)</summary>
       <div class="config-body">
-        <label>Google Apps Script 後端網址：
+        <!-- 區塊 1：GAS 網址 -->
+        <div class="config-section">
+          <div class="config-title">1. Google Apps Script 後端網址</div>
           <input id="gasUrl" type="text" placeholder="貼上 Apps Script exec 網址">
-        </label>
-        <button onclick="saveConfig()" class="btn-secondary">儲存設定</button>
+          <button onclick="saveConfig()" class="btn-secondary">儲存後端網址</button>
+        </div>
+
+        <!-- 區塊 2：新增工地 -->
+        <div class="config-section">
+          <div class="config-title">2. 新增工地案場</div>
+          <input id="newSiteName" type="text" placeholder="工地名稱（例：三重捷運路）">
+          <input id="newSiteKeywords" type="text" placeholder="語音關鍵字，逗號分隔（例：三重,捷運）">
+          <input id="newSiteSheetUrl" type="text" placeholder="貼上該工地 Google 試算表網址或 ID">
+          <button onclick="addNewSite()" class="btn-add-site">➕ 新增工地至清單</button>
+        </div>
+
+        <!-- 區塊 3：已建立工地清單 -->
+        <div class="config-section">
+          <div class="config-title">3. 目前已設定的工地清單</div>
+          <div id="siteListContainer" class="site-list"></div>
+        </div>
       </div>
     </details>
 
+    <!-- 語音按鈕區 -->
     <div class="mic-section">
       <button id="micBtn" onclick="handleBtnClick()" class="mic-btn">
         <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
@@ -77,18 +114,21 @@
       <p id="subHint" class="sub-hint">說「修正」自動覆蓋，否則預設累加</p>
     </div>
 
+    <!-- 辨識文字區 -->
     <div>
       <div class="label-row">
         <label>辨識文字（可手動修改）：</label>
         <button onclick="reParseManual()" class="link-btn">手動修改後重解</button>
       </div>
-      <textarea id="voiceText" rows="2" placeholder="例：永和國光今天木工2人釘天花板（預設累加，說「修正」則覆蓋）"></textarea>
+      <textarea id="voiceText" rows="2" placeholder="例：永和國光今天木工2人釘天花板"></textarea>
     </div>
 
+    <!-- 解析結果卡片 -->
     <div class="preview-card">
       <div class="card-title-row">
-        <strong>⚡ 本地秒級解析結果</strong>
-        <span id="parsedSite" class="site-tag">案名：永和國光</span>
+        <strong>⚡ 解析結果</strong>
+        <!-- 可直接切換的案名下拉選單 -->
+        <select id="siteSelect" class="site-select" onchange="onSiteSelectChange()"></select>
       </div>
 
       <div class="date-row">
@@ -96,7 +136,6 @@
         <input id="logDate" type="date">
       </div>
 
-      <!-- 寫入模式切換開關 -->
       <div class="mode-group">
         <button id="btnModeAppend" type="button" onclick="setWriteMode('append')" class="mode-btn active-append">➕ 累加至當日 (保留舊資料)</button>
         <button id="btnModeOverwrite" type="button" onclick="setWriteMode('overwrite')" class="mode-btn">✏️ 覆蓋修正 (取代當日)</button>
@@ -119,7 +158,14 @@
     let recognition = null;
     let isRecording = false;
     let parsedResult = null;
-    let currentMode = 'append'; // 預設為累加模式 ('append' | 'overwrite')
+    let currentMode = 'append';
+    let sitesList = [];
+
+    // 預設初始工地
+    const DEFAULT_SITES = [
+      { name: "永和國光", keywords: ["永和", "國光"], sheetId: "1J_KXCEshTFqNITGPvyv0PawsnQLngggDwBUfhyf8Nas" },
+      { name: "板橋電銷", keywords: ["板橋", "電銷"], sheetId: "1VL9Px8nqxFva_KEXhsYnbWeAcgSKhlXD4AEGOFelB_o" }
+    ];
 
     const STANDARD_JOBS_CONFIG = [
       { name: "大工", aliases: ["大工"] },
@@ -134,19 +180,122 @@
     ];
 
     const ALL_STANDARD_KEYWORDS = STANDARD_JOBS_CONFIG.flatMap(j => [j.name, ...j.aliases]);
-
-    const CHINESE_NUMS = {
-      '零': 0, '一': 1, '二': 2, '兩': 2, '三': 3, '四': 4,
-      '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10,
-      '半': 0.5
-    };
+    const CHINESE_NUMS = { '零': 0, '一': 1, '二': 2, '兩': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10, '半': 0.5 };
 
     window.onload = () => {
       document.getElementById('gasUrl').value = localStorage.getItem('gas_backend_url') || '';
+      loadSites();
       setTargetDate(new Date());
       setWriteMode('append');
       initSpeech();
     };
+
+    // ── 工地清單管理邏輯 ──
+    function loadSites() {
+      const saved = localStorage.getItem('custom_sites_list');
+      if (saved) {
+        try {
+          sitesList = JSON.parse(saved);
+        } catch (e) {
+          sitesList = [...DEFAULT_SITES];
+        }
+      } else {
+        sitesList = [...DEFAULT_SITES];
+        saveSitesToStorage();
+      }
+      renderSitesUI();
+    }
+
+    function saveSitesToStorage() {
+      localStorage.setItem('custom_sites_list', JSON.stringify(sitesList));
+      renderSitesUI();
+    }
+
+    function extractSheetId(urlOrId) {
+      const str = urlOrId.trim();
+      const match = str.match(/\/d\/([a-zA-Z0-9-_]+)/);
+      return match ? match[1] : str;
+    }
+
+    function addNewSite() {
+      const name = document.getElementById('newSiteName').value.trim();
+      const kwRaw = document.getElementById('newSiteKeywords').value.trim();
+      const urlRaw = document.getElementById('newSiteSheetUrl').value.trim();
+
+      if (!name) return alert('請輸入工地名稱！');
+      if (!urlRaw) return alert('請貼上該工地的 Google 試算表網址或 ID！');
+
+      const sheetId = extractSheetId(urlRaw);
+      const keywords = kwRaw
+        ? kwRaw.split(/[,，、\s]+/).map(k => k.trim()).filter(Boolean)
+        : [name];
+      if (!keywords.includes(name)) keywords.unshift(name);
+
+      // 若名稱已存在則更新，否則新增
+      const existingIdx = sitesList.findIndex(s => s.name === name);
+      if (existingIdx >= 0) {
+        sitesList[existingIdx] = { name, keywords, sheetId };
+      } else {
+        sitesList.push({ name, keywords, sheetId });
+      }
+
+      saveSitesToStorage();
+      document.getElementById('newSiteName').value = '';
+      document.getElementById('newSiteKeywords').value = '';
+      document.getElementById('newSiteSheetUrl').value = '';
+      document.getElementById('siteSelect').value = name;
+      alert(`✅ 已成功新增工地【${name}】！`);
+    }
+
+    function removeSite(idx) {
+      if (sitesList.length <= 1) return alert('至少需保留一個工地！');
+      const targetName = sitesList[idx].name;
+      if (!confirm(`確定要從清單移除【${targetName}】嗎？（不會刪除雲端試算表檔案）`)) return;
+      sitesList.splice(idx, 1);
+      saveSitesToStorage();
+    }
+
+    function renderSitesUI() {
+      const listEl = document.getElementById('siteListContainer');
+      const selectEl = document.getElementById('siteSelect');
+      const prevSelected = selectEl.value;
+
+      listEl.innerHTML = '';
+      selectEl.innerHTML = '';
+
+      sitesList.forEach((site, idx) => {
+        // 渲染設定區清單
+        const item = document.createElement('div');
+        item.className = 'site-item';
+        item.innerHTML = `
+          <div class="site-item-info">
+            <span class="site-item-name">${site.name}</span>
+            <span class="site-item-sub">關鍵字：${site.keywords.join('、')} | ID：${site.sheetId.slice(0, 10)}...</span>
+          </div>
+          <button type="button" class="btn-remove-site" onclick="removeSite(${idx})">移除</button>
+        `;
+        listEl.appendChild(item);
+
+        // 渲染卡片下拉選單
+        const opt = document.createElement('option');
+        opt.value = site.name;
+        opt.textContent = `案名：${site.name}`;
+        selectEl.appendChild(opt);
+      });
+
+      if (prevSelected && sitesList.some(s => s.name === prevSelected)) {
+        selectEl.value = prevSelected;
+      }
+    }
+
+    function onSiteSelectChange() {
+      if (parsedResult) {
+        const selectedName = document.getElementById('siteSelect').value;
+        const siteObj = sitesList.find(s => s.name === selectedName);
+        parsedResult.site = selectedName;
+        parsedResult.sheetId = siteObj ? siteObj.sheetId : '';
+      }
+    }
 
     function setWriteMode(mode) {
       currentMode = mode;
@@ -243,7 +392,7 @@
     function parseLocally(speechText) {
       document.getElementById('statusTag').innerText = '解析完成';
 
-      // 0. 語音偵測寫入模式（說「修正/覆蓋/改成/更正」自動切換為覆蓋，否則預設累加）
+      // 0. 偵測寫入模式
       if (/(修正|更正|覆蓋|改成)/.test(speechText)) {
         setWriteMode('overwrite');
       } else {
@@ -264,11 +413,15 @@
       }
       setTargetDate(targetDate);
 
-      // 2. 案名判定
-      let detectedSite = "永和國光";
-      if (speechText.includes("板橋")) detectedSite = "板橋電銷";
-      else if (speechText.includes("永和") || speechText.includes("國光")) detectedSite = "永和國光";
-      else if (speechText.includes("三重") || speechText.includes("捷運")) detectedSite = "三重捷運路";
+      // 2. 動態比對自訂工地清單
+      let matchedSite = sitesList.find(s => s.name === document.getElementById('siteSelect').value) || sitesList[0];
+      for (const site of sitesList) {
+        if (site.keywords.some(kw => speechText.includes(kw))) {
+          matchedSite = site;
+          break;
+        }
+      }
+      document.getElementById('siteSelect').value = matchedSite.name;
 
       let remainingText = speechText;
 
@@ -311,16 +464,22 @@
         remainingText = remainingText.replace(customMatch[0], ' ');
       }
 
-      // 5. 清理施作內容（過濾模式指令字眼）
+      // 5. 動態清除所有已設定的工地關鍵字與日期雜訊
+      const allSiteKeywords = sitesList.flatMap(s => [s.name, ...s.keywords]).sort((a, b) => b.length - a.length);
+      if (allSiteKeywords.length > 0) {
+        const siteRegex = new RegExp(`(?:${allSiteKeywords.join('|')})(?:案|工地|案場)?`, 'g');
+        remainingText = remainingText.replace(siteRegex, '');
+      }
+
       let cleanTask = remainingText
-        .replace(/(永和國光|板橋電銷|三重捷運路|永和案|板橋案|案場|工地)/g, '')
         .replace(/(今天|本日|昨日|昨天|前天|前日|\d{1,2}[月\/]\d{1,2}[號日]?)/g, '')
-        .replace(/(修正|更正|覆蓋|改成|追加|新增)/g, '')
+        .replace(/(修正|更正|覆蓋|改成|追加|新增|案場|工地)/g, '')
         .replace(/[，,。、\s]+/g, ' ')
         .trim();
 
       parsedResult = {
-        site: detectedSite,
+        site: matchedSite.name,
+        sheetId: matchedSite.sheetId,
         date: document.getElementById('logDate').value,
         mode: currentMode,
         workers: workers,
@@ -332,7 +491,6 @@
       };
 
       // 6. 更新卡片
-      document.getElementById('parsedSite').innerText = '案名：' + parsedResult.site;
       document.getElementById('parsedTask').innerText = parsedResult.mainTask || '(無新增工項文字)';
 
       let workerList = [];
@@ -351,6 +509,10 @@
       if (!gasUrl) return alert('請先在設定中填入 GAS 網址！');
       if (!parsedResult) return alert('尚未有解析資料，請先錄音或手動輸入！');
 
+      const selectedName = document.getElementById('siteSelect').value;
+      const siteObj = sitesList.find(s => s.name === selectedName);
+      parsedResult.site = selectedName;
+      parsedResult.sheetId = siteObj ? siteObj.sheetId : '';
       parsedResult.date = document.getElementById('logDate').value;
       parsedResult.mode = currentMode;
 
@@ -382,10 +544,11 @@
       const gasUrl = (localStorage.getItem('gas_backend_url') || '').trim();
       if (!gasUrl) return alert('請先在設定中填入 GAS 網址！');
 
-      const siteText = document.getElementById('parsedSite').innerText.replace('案名：', '').trim();
+      const selectedName = document.getElementById('siteSelect').value;
+      const siteObj = sitesList.find(s => s.name === selectedName);
       const targetDate = document.getElementById('logDate').value;
 
-      if (!confirm(`確定要清空【${siteText}】在 ${targetDate} 的所有出工與施工項目嗎？`)) return;
+      if (!confirm(`確定要清空【${selectedName}】在 ${targetDate} 的所有出工與施工項目嗎？`)) return;
 
       const delBtn = document.getElementById('delBtn');
       delBtn.disabled = true;
@@ -393,7 +556,12 @@
       try {
         const res = await fetch(gasUrl, {
           method: 'POST',
-          body: JSON.stringify({ action: 'delete', site: siteText, date: targetDate })
+          body: JSON.stringify({
+            action: 'delete',
+            site: selectedName,
+            sheetId: siteObj ? siteObj.sheetId : '',
+            date: targetDate
+          })
         });
         const resp = await res.json();
         alert(resp.message || '已清空當日紀錄！');
